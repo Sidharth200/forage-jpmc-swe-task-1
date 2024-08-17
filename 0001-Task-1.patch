@@ -1,65 +1,40 @@
-From 0aee867f076f67f9680ec2514ba126e500ef4ded Mon Sep 17 00:00:00 2001
-From: Sidharth Lohchab <sidhugoli2003@gmail.com>
-Date: Mon, 20 May 2024 17:18:42 +0530
-Subject: [PATCH] Task 1
+import json
+import random
+import urllib.request
 
----
- client3.py | 25 +++++++++++++++++++------
- 1 file changed, 19 insertions(+), 6 deletions(-)
+N = 10  # Number of iterations or queries
+QUERY = "http://someapi.com/quotes?random={}"
 
-diff --git a/client3.py b/client3.py
-index 3fc09b7..3f620ff 100644
---- a/client3.py
-+++ b/client3.py
-@@ -31,29 +31,42 @@ N = 500
- 
- def getDataPoint(quote):
-     """ Produce all the needed values to generate a datapoint """
--    """ ------------- Update this function ------------- """
-     stock = quote['stock']
-     bid_price = float(quote['top_bid']['price'])
-     ask_price = float(quote['top_ask']['price'])
--    price = bid_price
-+    price = (bid_price + ask_price) / 2  # Compute the price as the average of bid and ask prices
-     return stock, bid_price, ask_price, price
- 
- 
-+
- def getRatio(price_a, price_b):
-     """ Get ratio of price_a and price_b """
--    """ ------------- Update this function ------------- """
--    return 1
-+    if price_b == 0:
-+        return None  # Handle division by zero by returning None
-+    return price_a / price_b
-+
- 
- 
- # Main
- if __name__ == "__main__":
-+    N = 10  # Define the number of iterations or queries
-+    QUERY = "http://someapi.com/quotes?random={}"
-+
-+    prices = {}  # Dictionary to store stock prices
-+
-     # Query the price once every N seconds.
--    for _ in iter(range(N)):
-+    for _ in range(N):
-         quotes = json.loads(urllib.request.urlopen(QUERY.format(random.random())).read())
- 
-         """ ----------- Update to get the ratio --------------- """
-         for quote in quotes:
-             stock, bid_price, ask_price, price = getDataPoint(quote)
-+            prices[stock] = price
-             print("Quoted %s at (bid:%s, ask:%s, price:%s)" % (stock, bid_price, ask_price, price))
- 
--        print("Ratio %s" % getRatio(price, price))
-+        # Assuming you have two specific stocks to compare, e.g., "ABC" and "DEF"
-+        if "ABC" in prices and "DEF" in prices:
-+            ratio = getRatio(prices["ABC"], prices["DEF"])
-+            print("Ratio %s" % ratio)
-+        else:
-+            print("One or both stocks are not available in the quotes.")
--- 
-2.44.0.windows.1
+def getDataPoint(quote):
+    """ Produce all the needed values to generate a datapoint """
+    stock = quote['stock']
+    bid_price = float(quote['top_bid']['price'])
+    ask_price = float(quote['top_ask']['price'])
+    price = (bid_price + ask_price) / 2  # Compute the price as the average of bid and ask prices
+    return stock, bid_price, ask_price, price
 
+def getRatio(price_a, price_b):
+    """ Get ratio of price_a and price_b """
+    if price_b == 0:
+        return None  # Handle division by zero by returning None
+    return price_a / price_b
+
+# Main
+if __name__ == "__main__":
+    prices = {}  # Dictionary to store stock prices
+
+    # Query the price once every N seconds.
+    for _ in range(N):
+        quotes = json.loads(urllib.request.urlopen(QUERY.format(random.random())).read())
+
+        for quote in quotes:
+            stock, bid_price, ask_price, price = getDataPoint(quote)
+            prices[stock] = price
+            print("Quoted %s at (bid:%s, ask:%s, price:%s)" % (stock, bid_price, ask_price, price))
+
+        # Assuming you have two specific stocks to compare, e.g., "ABC" and "DEF"
+        if "ABC" in prices and "DEF" in prices:
+            ratio = getRatio(prices["ABC"], prices["DEF"])
+            print("Ratio %s" % ratio)
+        else:
+            print("One or both stocks are not available in the quotes.")
